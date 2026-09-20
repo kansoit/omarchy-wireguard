@@ -18,18 +18,18 @@ Panel {
   readonly property color foreground: bar ? bar.foreground : Color.foreground
   readonly property color urgent: bar ? bar.urgent : Color.urgent
   readonly property color dim: Qt.darker(foreground, 1.55)
+  readonly property color connectedColor: Color.accent
   readonly property string fontFamily: bar ? bar.fontFamily : Style.font.family
   readonly property color hoverFill: bar ? Style.hoverFillFor(bar.foreground, Color.accent) : "transparent"
   readonly property color selectedFill: bar ? Style.selectedFillFor(bar.foreground, Color.accent) : "transparent"
 
   readonly property bool hasTunnels: wireguard.tunnels.length > 0
   readonly property bool primaryActive: wireguard.isActive(wireguard.primary)
-  // Accent while up, dimmed while down — the bar has room for one glyph, so
-  // colour carries the whole state.
+  // Normal foreground while down, green while up — the bar has room for one
+  // glyph, so colour carries the whole state.
   readonly property color barIconColor: {
-    if (!wireguard.loaded || !hasTunnels) return Qt.darker(barForeground, 1.9)
-    if (wireguard.anyActive) return Color.accent
-    return Qt.darker(barForeground, 1.55)
+    if (wireguard.anyActive) return connectedColor
+    return foreground
   }
   readonly property string toggleHint: {
     if (!wireguard.primary) return "No WireGuard tunnel configured"
