@@ -29,7 +29,7 @@ while IFS= read -r line; do
 
   if [ "$active" = "yes" ] && [ -n "$dev" ]; then
     printf '#DEV %s\n' "$dev"
-    nmcli -t -f IP4.ADDRESS,IP4.ROUTE,IP6.ADDRESS,IP6.ROUTE device show "$dev" 2>/dev/null
+    nmcli -t -f IP4.ADDRESS,IP4.ROUTE,IP6.ADDRESS,IP6.ROUTE,IP4.GATEWAY,IP6.GATEWAY,IP4.DNS,IP6.DNS device show "$dev" 2>/dev/null
     if [ -r "/sys/class/net/$dev/statistics/rx_bytes" ]; then
       printf '#STAT %s\n' "$dev"
       cat "/sys/class/net/$dev/statistics/rx_bytes" "/sys/class/net/$dev/statistics/tx_bytes" 2>/dev/null

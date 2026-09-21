@@ -92,9 +92,10 @@ Check `omarchy menu keybindings --print` for a conflict before picking a combo.
 ## What it shows
 
 The bar icon is dim when every tunnel is down and accent-coloured when any is
-up. Each panel row shows the tunnel name, its address, whether it carries all
-traffic or is a split tunnel, and live transfer counters. Inactive rows show the
-configured endpoint instead.
+up. When a tunnel is active, the panel shows a connection-status block with its
+profile, state, interface, address, gateway, DNS, routing mode, endpoint and
+live transfer counters. The tunnel list below is intentionally compact: each
+row shows only the tunnel name, state and switch.
 
 ## The primary tunnel
 

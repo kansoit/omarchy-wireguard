@@ -24,6 +24,12 @@ Panel {
   readonly property color selectedFill: bar ? Style.selectedFillFor(bar.foreground, Color.accent) : "transparent"
 
   readonly property bool hasTunnels: wireguard.tunnels.length > 0
+  readonly property var statusTunnel: {
+    for (var i = 0; i < wireguard.tunnels.length; i++) {
+      if (wireguard.isActive(wireguard.tunnels[i])) return wireguard.tunnels[i]
+    }
+    return wireguard.primary
+  }
   // Normal foreground while down, green while up — the bar has room for one
   // glyph, so colour carries the whole state.
   readonly property color barIconColor: {
@@ -210,6 +216,28 @@ Panel {
             wrapMode: Text.WordWrap
           }
 
+          Column {
+            visible: wireguard.anyActive && root.statusTunnel !== null
+            width: parent.width
+            spacing: Style.space(5)
+
+            PanelSectionHeader {
+              text: "CONNECTION STATUS"
+              foreground: root.foreground
+              fontFamily: root.fontFamily
+            }
+
+            ConnectionInfoRow { label: "Profile"; value: root.statusTunnel ? root.statusTunnel.name : "—" }
+            ConnectionInfoRow { label: "State"; value: root.statusTunnel ? (root.statusTunnel.activating ? "Connecting…" : "Connected") : "—" }
+            ConnectionInfoRow { label: "Interface"; value: root.statusTunnel && root.statusTunnel.device ? root.statusTunnel.device : "—" }
+            ConnectionInfoRow { label: "Address"; value: root.statusTunnel && root.statusTunnel.addresses.length > 0 ? root.statusTunnel.addresses[0] : "—" }
+            ConnectionInfoRow { label: "Gateway"; value: root.statusTunnel && root.statusTunnel.gateways.length > 0 ? root.statusTunnel.gateways[0] : "—" }
+            ConnectionInfoRow { label: "DNS"; value: root.statusTunnel && root.statusTunnel.dns.length > 0 ? root.statusTunnel.dns.join(", ") : "—" }
+            ConnectionInfoRow { label: "Routing"; value: root.statusTunnel ? (root.statusTunnel.fullTunnel ? "All traffic" : "Split tunnel") : "—" }
+            ConnectionInfoRow { label: "Endpoint"; value: root.statusTunnel && root.statusTunnel.endpoint ? root.statusTunnel.endpoint : "—" }
+            ConnectionInfoRow { label: "Transfer"; value: root.statusTunnel && root.statusTunnel.rx >= 0 && root.statusTunnel.tx >= 0 ? "↓ " + Model.humanBytes(root.statusTunnel.rx) + "   ↑ " + Model.humanBytes(root.statusTunnel.tx) : "—" }
+          }
+
           CursorSurface {
             visible: wireguard.loaded && !root.hasTunnels
             width: parent.width
@@ -267,8 +295,6 @@ Panel {
     property var tunnel: null
     property int rowIndex: 0
     readonly property bool tunnelActive: wireguard.isActive(tunnel)
-    readonly property string detailText: Model.tunnelDetail(tunnel)
-    readonly property string transferText: Model.transferDetail(tunnel)
 
     hasCursor: root.cursorActive && root.focusSection === "tunnels" && root.tunnelIndex === rowIndex
     current: tunnelActive
@@ -306,27 +332,6 @@ Panel {
           elide: Text.ElideRight
         }
 
-        Text {
-          textFormat: Text.PlainText
-          width: parent.width
-          visible: tunnelRow.detailText !== ""
-          text: tunnelRow.detailText
-          color: root.dim
-          font.family: root.fontFamily
-          font.pixelSize: Style.font.bodySmall
-          elide: Text.ElideRight
-        }
-
-        Text {
-          textFormat: Text.PlainText
-          width: parent.width
-          visible: tunnelRow.transferText !== ""
-          text: tunnelRow.transferText
-          color: root.dim
-          font.family: root.fontFamily
-          font.pixelSize: Style.font.bodySmall
-          elide: Text.ElideRight
-        }
       }
 
       ToggleSwitch {
@@ -351,6 +356,31 @@ Panel {
       anchors.rightMargin: rowSwitch.width + Style.space(20)
       onEntered: root.setTunnelCursor(tunnelRow.rowIndex)
       onClicked: if (tunnelRow.tunnel) wireguard.toggleTunnel(tunnelRow.tunnel.uuid)
+    }
+  }
+
+  component ConnectionInfoRow: RowLayout {
+    property string label: ""
+    property string value: ""
+    width: parent ? parent.width : 0
+    spacing: Style.space(8)
+
+    Text {
+      Layout.preferredWidth: Style.space(78)
+      text: parent.label
+      color: root.dim
+      font.family: root.fontFamily
+      font.pixelSize: Style.font.bodySmall
+    }
+
+    Text {
+      Layout.fillWidth: true
+      text: parent.value
+      textFormat: Text.PlainText
+      color: root.foreground
+      font.family: root.fontFamily
+      font.pixelSize: Style.font.bodySmall
+      elide: Text.ElideRight
     }
   }
 }

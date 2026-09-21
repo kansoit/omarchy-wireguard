@@ -89,7 +89,7 @@ function parsePoll(raw, previous) {
       section = space === -1 ? line.substring(1) : line.substring(1, space)
       argument = space === -1 ? "" : line.substring(space + 1)
       if (section === "PEER" || section === "DEV" || section === "STAT") {
-        if (!details[argument]) details[argument] = { peerRaw: "", addresses: [], routes: [], rx: -1, tx: -1 }
+        if (!details[argument]) details[argument] = { peerRaw: "", addresses: [], routes: [], gateways: [], dns: [], rx: -1, tx: -1 }
       }
       continue
     }
@@ -124,6 +124,10 @@ function parsePoll(raw, previous) {
         // `dst = 0.0.0.0/0, nh = 0.0.0.0, mt = 50`
         var dst = kv.value.match(/dst\s*=\s*([^,]+)/)
         if (dst) details[argument].routes.push(dst[1].trim())
+      } else if (kv.key.indexOf("IP4.GATEWAY") === 0 || kv.key.indexOf("IP6.GATEWAY") === 0) {
+        if (kv.value !== "") details[argument].gateways.push(kv.value)
+      } else if (kv.key.indexOf("IP4.DNS") === 0 || kv.key.indexOf("IP6.DNS") === 0) {
+        if (kv.value !== "") details[argument].dns.push(kv.value)
       }
     } else if (section === "STAT") {
       if (details[argument].rx === -1) details[argument].rx = Number(line)
@@ -134,7 +138,7 @@ function parsePoll(raw, previous) {
   var tunnels = []
   for (var c = 0; c < conns.length; c++) {
     var conn = conns[c]
-    var byUuid = details[conn.uuid] || { peerRaw: "", addresses: [], routes: [], rx: -1, tx: -1 }
+    var byUuid = details[conn.uuid] || { peerRaw: "", addresses: [], routes: [], gateways: [], dns: [], rx: -1, tx: -1 }
     var byDev = conn.device !== "" && details[conn.device] ? details[conn.device] : null
     var routes = byDev ? byDev.routes : []
     var fullTunnel = false
@@ -154,6 +158,8 @@ function parsePoll(raw, previous) {
       allowedIps: allowed,
       addresses: byDev ? byDev.addresses : [],
       routes: routes,
+      gateways: byDev ? byDev.gateways : [],
+      dns: byDev ? byDev.dns : [],
       fullTunnel: fullTunnel,
       rx: byDev ? byDev.rx : -1,
       tx: byDev ? byDev.tx : -1
