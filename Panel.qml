@@ -359,35 +359,33 @@ Panel {
     }
   }
 
-  component ConnectionInfoRow: Item {
+  component ConnectionInfoRow: Row {
     property string label: ""
     property string value: ""
-    width: parent ? parent.width : 0
-    implicitHeight: Math.max(labelText.implicitHeight, valueText.implicitHeight)
+    width: parent.width
+    spacing: Style.space(8)
 
     Text {
-      id: labelText
-      anchors.left: parent.left
-      anchors.verticalCenter: parent.verticalCenter
-      width: Style.space(78)
+      textFormat: Text.PlainText
       text: parent.label
       color: root.dim
       font.family: root.fontFamily
       font.pixelSize: Style.font.bodySmall
     }
 
+    Item {
+      width: Math.max(0, parent.width - parent.children[0].implicitWidth - parent.children[2].implicitWidth - parent.spacing * 2)
+      height: 1
+    }
+
     Text {
-      id: valueText
-      anchors.left: labelText.right
-      anchors.leftMargin: Style.space(8)
-      anchors.right: parent.right
-      anchors.verticalCenter: parent.verticalCenter
-      text: parent.value
       textFormat: Text.PlainText
+      text: parent.value
       color: root.foreground
       font.family: root.fontFamily
       font.pixelSize: Style.font.bodySmall
-      elide: Text.ElideRight
+      elide: Text.ElideLeft
+      width: Math.min(implicitWidth, parent.width * 0.65)
     }
   }
 }
