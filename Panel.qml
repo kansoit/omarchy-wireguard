@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell.Io
 import qs.Commons
 import qs.Ui
@@ -360,14 +359,17 @@ Panel {
     }
   }
 
-  component ConnectionInfoRow: RowLayout {
+  component ConnectionInfoRow: Item {
     property string label: ""
     property string value: ""
     width: parent ? parent.width : 0
-    spacing: Style.space(8)
+    implicitHeight: Math.max(labelText.implicitHeight, valueText.implicitHeight)
 
     Text {
-      Layout.preferredWidth: Style.space(78)
+      id: labelText
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      width: Style.space(78)
       text: parent.label
       color: root.dim
       font.family: root.fontFamily
@@ -375,7 +377,11 @@ Panel {
     }
 
     Text {
-      Layout.fillWidth: true
+      id: valueText
+      anchors.left: labelText.right
+      anchors.leftMargin: Style.space(8)
+      anchors.right: parent.right
+      anchors.verticalCenter: parent.verticalCenter
       text: parent.value
       textFormat: Text.PlainText
       color: root.foreground
