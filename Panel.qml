@@ -197,20 +197,33 @@ Panel {
               }
 
               trailingControl: Component {
-                ToggleSwitch {
-                  id: powerSwitch
-                  visible: root.hasTunnels
-                  checked: root.primaryActive
-                  busy: wireguard.busy
-                  hasCursor: header.ringVisible
-                  foreground: hero.foreground
-                  onHovered: function (on) { if (on) header.focusHero() }
-                  onToggled: wireguard.toggleTunnel("")
+                Row {
+                  spacing: Style.space(4)
 
-                  PanelToolTip {
-                    visible: powerSwitch.containsMouse
-                    text: root.toggleHint
+                  ToggleSwitch {
+                    id: powerSwitch
+                    visible: root.hasTunnels && wireguard.tunnels.length > 1
+                    checked: root.primaryActive
+                    busy: wireguard.busy
+                    hasCursor: header.ringVisible
+                    foreground: hero.foreground
+                    onHovered: function (on) { if (on) header.focusHero() }
+                    onToggled: wireguard.toggleTunnel("")
+
+                    PanelToolTip {
+                      visible: powerSwitch.containsMouse
+                      text: root.toggleHint
+                      fontFamily: hero.fontFamily
+                    }
+                  }
+
+                  PanelActionButton {
+                    iconText: ""
+                    tooltipText: "Refresh WireGuard status"
+                    foreground: hero.foreground
                     fontFamily: hero.fontFamily
+                    enabled: !wireguard.busy
+                    onClicked: wireguard.refresh()
                   }
                 }
               }
