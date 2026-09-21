@@ -24,16 +24,11 @@ Panel {
   readonly property color selectedFill: bar ? Style.selectedFillFor(bar.foreground, Color.accent) : "transparent"
 
   readonly property bool hasTunnels: wireguard.tunnels.length > 0
-  readonly property bool primaryActive: wireguard.isActive(wireguard.primary)
   // Normal foreground while down, green while up — the bar has room for one
   // glyph, so colour carries the whole state.
   readonly property color barIconColor: {
     if (wireguard.anyActive) return connectedColor
     return foreground
-  }
-  readonly property string toggleHint: {
-    if (!wireguard.primary) return "No WireGuard tunnel configured"
-    return (primaryActive ? "Disconnect " : "Connect ") + wireguard.primary.name
   }
 
   // The bar sizes each widget from its root item's implicit size; without
@@ -174,11 +169,6 @@ Panel {
             id: header
             width: parent.width
             implicitHeight: hero.implicitHeight
-            // The hero's trailingControl resolves `root` to PanelHero, not this
-            // Panel, so panel state is reached through `header`.
-            readonly property bool ringVisible: root.cursorActive && root.focusSection === "header" && root.hasTunnels
-            function focusHero() { root.setHeaderCursor() }
-
             PanelHero {
               id: hero
               width: parent.width
@@ -197,34 +187,13 @@ Panel {
               }
 
               trailingControl: Component {
-                Row {
-                  spacing: Style.space(4)
-
-                  ToggleSwitch {
-                    id: powerSwitch
-                    visible: root.hasTunnels && wireguard.tunnels.length > 1
-                    checked: root.primaryActive
-                    busy: wireguard.busy
-                    hasCursor: header.ringVisible
-                    foreground: hero.foreground
-                    onHovered: function (on) { if (on) header.focusHero() }
-                    onToggled: wireguard.toggleTunnel("")
-
-                    PanelToolTip {
-                      visible: powerSwitch.containsMouse
-                      text: root.toggleHint
-                      fontFamily: hero.fontFamily
-                    }
-                  }
-
-                  PanelActionButton {
-                    iconText: ""
-                    tooltipText: "Refresh WireGuard status"
-                    foreground: hero.foreground
-                    fontFamily: hero.fontFamily
-                    enabled: !wireguard.busy
-                    onClicked: wireguard.refresh()
-                  }
+                PanelActionButton {
+                  iconText: ""
+                  tooltipText: "Refresh WireGuard status"
+                  foreground: hero.foreground
+                  fontFamily: hero.fontFamily
+                  enabled: !wireguard.busy
+                  onClicked: wireguard.refresh()
                 }
               }
             }
